@@ -1,6 +1,8 @@
 import express from "express";
 import {config} from 'dotenv'
-import {connectDB, disconnectDB} from "./config/db.js"
+import {connectDB, disconnectDB} from "./config/db.js";
+
+import authRoutes from "./routes/authRoutes.js";
 
 config();
 connectDB();
@@ -14,6 +16,16 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.send(" API running...");
 });
+
+
+
+
+app.use("/auth", authRoutes);
+
+
+
+
+
 
 const PORT = 5000;
 
