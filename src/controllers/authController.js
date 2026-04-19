@@ -1,6 +1,7 @@
 import express from "express";
 import { prisma } from "../config/db.js";
 import bcrypt from "bcryptjs";
+import { generateToken } from "../utils/generateToken.js";
 
 const signup = async (req, res) => {
   const { username, email, password } = req.body;
@@ -37,9 +38,12 @@ const signup = async (req, res) => {
     },
   });
 
+  const token = generateToken(user, res);
+
   return res.status(201).json({
     success: true,
     message: "User registered successfully",
+    token,
     user: {
       id: user.id,
       username: user.username,
@@ -78,9 +82,12 @@ const login = async (req, res) => {
     });
   }
 
+  const token = generateToken(user, res);
+
   return res.status(201).json({
     success: true,
     message: "User registered successfully",
+    token,
     user: {
       id: user.id,
       username: user.username,
