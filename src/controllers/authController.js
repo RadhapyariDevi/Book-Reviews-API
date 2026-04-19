@@ -97,11 +97,30 @@ const login = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-
+  res.cookie("token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
 };
 
-const getMe = async (req, res) => {
-
+const getMe = async (req, res, next) => {
+  try{  const user = req.user;
+    return res.status(200).json({
+      success: true,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+      },
+    });
+  }
+  catch(err){
+    next(err);
+  }
 }
 
 export {signup, login, logout, getMe}
