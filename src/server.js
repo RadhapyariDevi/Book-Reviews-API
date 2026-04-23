@@ -4,6 +4,7 @@ import {connectDB, disconnectDB} from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
 import bookRoutes from "./routes/bookRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 
 config();
 connectDB();
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/books",bookRoutes);
+app.use("/reviews", reviewRoutes);
 
 
 
