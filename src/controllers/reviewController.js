@@ -75,8 +75,68 @@ const updateReview = async (req, res, next) => {
     });
 };
 
-const deleteReview = async (req, res, next) => { };
+const deleteReview = async (req, res, next) => { 
+    const {reviewId} = req.params;
+    const reviewIdInt = Number(reviewId);
+    const userId = req.user.id;
 
-const getReviewsByISBN = async (req, res, next) => { };
+    const review = await prisma.review.findUnique({
+        where : {id: reviewIdInt},
+    });
+
+    if(!review){
+        return res.status(404).json({error: "Review not found"});
+    }
+
+    if(review.userId !== userId){
+        return res.status(403).json({error : "You can only delete your reviews"});
+    }
+    const deletedReview = await prisma.review.delete({
+        where : {id:reviewIdInt},
+    });
+
+    return res.status(200).json({
+        success:true,
+        data : deletedReview,
+        message: "Review deleted successfully",
+    });
+};
+
+const getReviewsByISBN = async (req, res, next) => { 
+    const {isbn} = req.params;
+    const userId = req.user.id;
+
+    const book = await prisma.book.findUnique({
+        where : {isbn},
+        include: {
+            reviews: {
+                include: {
+                    user: {
+                        select:{
+                            username: true,
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    if (!book) {
+        return res.status(404).json({ error: "Book not found" });
+    }
+
+    return res.status(200).json({
+        success: true,
+        data: book.reviews.map(review => ({
+            id: review.id,
+            rating: review.rating,
+            comment: review.comment,
+            user: review.user.username,
+        })),
+        message: "Reviews fetched successfully"
+    })
+
+    
+};
 
 export { addReview, updateReview, deleteReview, getReviewsByISBN };
