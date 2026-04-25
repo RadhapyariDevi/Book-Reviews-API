@@ -1,71 +1,82 @@
 import express from "express";
-import {prisma} from "../config/db.js";
+import { prisma } from "../config/db.js";
 
-
-const addReview = async (req,res,next)=>{
-    const {isbn} = req.params;
-    const {rating,comment} = req.body;
+const addReview = async (req, res, next) => {
+    const { isbn } = req.params;
+    const { rating, comment } = req.body;
     const userId = req.user.id;
 
     const book = await prisma.book.findUnique({
-        where:{isbn},
+        where: { isbn },
     });
-    if(!book){
-        return res.status(404).json({error:"Book not found"});
+    if (!book) {
+        return res.status(404).json({ error: "Book not found" });
     }
 
     const existingReview = await prisma.review.findUnique({
-        where:{
-            userId_bookId:{
-                userId:userId,
-                bookId:book.id
-            }
-        }
+        where: {
+            userId_bookId: {
+                userId: userId,
+                bookId: book.id,
+            },
+        },
     });
-    if(existingReview){
+    if (existingReview) {
         return res.status(409).json({
-            error:"You already reviewed this book"
-        })
+            error: "You already reviewed this book",
+        });
     }
 
     const review = await prisma.review.create({
-        data:{
+        data: {
             rating,
             comment,
             userId,
-            bookId: book.id
-        }
-    })
+            bookId: book.id,
+        },
+    });
 
     return res.status(201).json({
-        success:true,
+        success: true,
         data: review,
-        message:"Review added successfully"
+        message: "Review added successfully",
     });
 };
 
-const updateReview = async (req,res,next)=>{
-    const {reviewId} = req.params;
-    const {rating, comment} = req.body;
+const updateReview = async (req, res, next) => {
+    const { reviewId } = req.params;
+    const { rating, comment } = req.body;
     const userId = req.user.id;
+    const reviewIdInt = Number(reviewId);
 
     const review = await prisma.review.findUnique({
-        where:{id:reviewId},
+        where: { id: reviewIdInt },
     });
 
-    if(!review){
-        return res.status(404).json({error:"Review not found"});
+    if (!review) {
+        return res.status(404).json({ error: "Review not found" });
     }
-    
+
+    if (review.userId !== userId) {
+        return res.status(403).json({ error: "You can only update your reviews" });
+    }
+
+    const updatedReview = await prisma.review.update({
+        where: {id: reviewIdInt},
+        data: {
+            rating: rating !== undefined?rating : review.rating,
+            comment: comment !== undefined?comment : review.comment,
+        }
+    });
+    return res.status(200).json({
+        success: true,
+        data: updatedReview,
+        message: "Review updated successfully",
+    });
 };
 
-const deleteReview = async (req,res,next)=>{
+const deleteReview = async (req, res, next) => { };
 
-};
+const getReviewsByISBN = async (req, res, next) => { };
 
-const getReviewsByISBN = async (req,res,next)=>{
-
-};
-
-
-export { addReview, updateReview, deleteReview, getReviewsByISBN }
+export { addReview, updateReview, deleteReview, getReviewsByISBN };

@@ -73,7 +73,7 @@ const login = async (req, res) => {
     });
   }
 
-  const isPasswordCorrect = await bcrypt.compare(password, user.password);
+  const isPasswordCorrect = await bcrypt.compare(password, existUser.password);
 
   if (!isPasswordCorrect) {
     return res.status(401).json({
@@ -82,16 +82,16 @@ const login = async (req, res) => {
     });
   }
 
-  const token = generateToken(user, res);
+  const token = generateToken(existUser, res);
 
   return res.status(201).json({
     success: true,
     message: "User registered successfully",
     token,
     user: {
-      id: user.id,
-      username: user.username,
-      email: user.email,
+      id: existUser.id,
+      username: existUser.username,
+      email: existUser.email,
     },
   });
 };
