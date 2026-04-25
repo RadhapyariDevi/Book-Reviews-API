@@ -5,12 +5,14 @@ import { addReviewValidator, updateReviewValidator } from "../validators/reviewV
 
 const router = express.Router();
 
+
+router.get('/:isbn', getReviewsByISBN);
+
 router.use(protect);
 
 router.post('/:isbn', addReviewValidator, addReview);
 router.put('/:reviewId', updateReviewValidator, updateReview);
 router.delete('/:reviewId', deleteReview);
-router.get('/:isbn', getReviewsByISBN);
 
 export default router;
 
